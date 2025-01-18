@@ -7,7 +7,6 @@ COPY . .
 RUN npm install
 
 ENV GCP_BUILDPACKS="make-sveltekit-adapter-auto-use-node"
-RUN npm run prepare
 RUN npm run build
 
 # ---- Production ----
