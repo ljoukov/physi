@@ -12,14 +12,18 @@
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+		"proto:generate": "rm -rf proto/generated && mkdir -p proto/generated/ts/proto && protoc --ts_out=proto/generated/ts/proto/ --ts_opt eslint_disable,long_type_string,ts_nocheck --proto_path=proto/src/ proto/src/third_party/*.proto  proto/src/google/protobuf/*.proto",
+		"proto:format": "clang-format --style=google -i proto/src/*.proto"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
+		"@protobuf-ts/plugin": "^2.9.4",
 		"@sveltejs/adapter-node": "^5.2.11",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^4.0.0",
+		"@types/node": "^22.10.7",
 		"autoprefixer": "^10.4.20",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
@@ -34,6 +38,7 @@
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.20.0",
 		"vite": "^5.4.11",
-		"vitest": "^2.1.8"
+		"vitest": "^2.1.8",
+		"zod": "^3.24.1"
 	}
 }
