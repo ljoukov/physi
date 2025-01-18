@@ -1,7 +1,7 @@
 options:
   dynamicSubstitutions: true
 substitutions:
-  _SERVICE_NAME: flipflop-web
+  _SERVICE_NAME: physi
   _REGION: us-central1
   _PROJECT_ID: fluent-observer-423319-s3
   _IMAGE_NAME: ${_REGION}-docker.pkg.dev/${_PROJECT_ID}/flipflop-docker-repo/${_SERVICE_NAME}-image:tag1
