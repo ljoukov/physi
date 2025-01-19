@@ -3,6 +3,7 @@ import { llmCompletion, llmTextStream, type LLMCompletionRequest } from "../util
 import { parseKeyValueDelta, SEPARATOR } from "../util/delta_parser";
 import { tts, ttsSegment, type Transcript } from "../util/tts";
 import { getTempFilePath, writeUint8ArrayToTempFile } from "../util/file";
+import { base64encode } from "$lib/util/base64";
 
 export const therapyInputSchema = z.object({ userInput: z.string() });
 export type TherapyInput = z.infer<typeof therapyInputSchema>;
@@ -108,6 +109,11 @@ export function parsePlan(llmOutput: string): Plan {
 
 async function generateTranscript(plan: Plan, log: (msg: string) => void): Promise<Transcript> {
     log('Generating transcript');
+    /*
+    <COOL_DOWN_PLAN>
+    ${plan.cooldown}
+    </COOL_DOWN_PLAN>
+    */
     const llmRequest: LLMCompletionRequest = {
         model: 'gemini-exp-1206',
         max_tokens: 4096,
@@ -126,16 +132,13 @@ ${plan.warmup}
 <EXERCISE_PLAN>
 ${plan.exercise}
 </EXERCISE_PLAN>
-<COOL_DOWN_PLAN>
-${plan.cooldown}
-</COOL_DOWN_PLAN>
 
 Go through each required repetition explicitly in a natural way.
 
 Produce output in the following format:
 <OUTPUT_FORMAT>
 $TITLE: [text to be displayed for the user, 3-4 words]
-$SECTION: warmup, exercise, cooldown
+$SECTION: warmup
 $VOICE: [instructor's speech]
 $REPS_START: [total repetitions] marks the beginning of repetitions sequence
 $REP: [current repetition] / [total repetitions] this starts the repetition
@@ -146,11 +149,9 @@ $PAUSE: [sec] use to enforce short pause, eg just after explanation before VOICE
 $REPS_END: [total repetitions] marks the end of repetitions sequence
 ...
 
-$SECTION: ...
+$SECTION: exercise
 ...
 
-$SECTION: ...
-...
 </OUTPUT_FORMAT>
 
 IMPORTANT:
@@ -287,10 +288,12 @@ export async function generateTherapy(therapyInput: TherapyInput, log: (msg: str
     const plan = await generatePlan(therapyInput, log);
     const transcript = await generateTranscript(plan, log);
     // Limit the number of segments to avoit too long wait times
-    transcript.segments = transcript.segments.slice(0, 50);
+    transcript.segments = transcript.segments.slice(0, 25);
     const { audio, audioDetails } = await tts(transcript);
     log(JSON.stringify({ audioDetails }));
     await writeUint8ArrayToTempFile(audio, "therapy.mp3");
+    const audioBase64 = Buffer.from(audio).toString('base64');
+    log(JSON.stringify({ audio: audioBase64 }));
     console.log(`Wrote: ${getTempFilePath("therapy.mp3")}`);
 }
 

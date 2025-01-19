@@ -5,6 +5,7 @@
 	let userInput = 'arm hurts after tennis';
 	let generating = false;
 	let output: string[] = [];
+	let audioB64: string | undefined;
 	let error: string | undefined;
 	let onCancel: () => void = () => {};
 	async function onRun() {
@@ -23,7 +24,9 @@
 				throw Error(`Server failure: ${await responseErrorAsString(resp)}`);
 			}
 			for await (const delta of parseEventSourceStream(resp.body)) {
-				if (delta.startsWith('{"text":')) {
+				if (delta.startsWith('{"audio":')) {
+					audioB64 = JSON.parse(delta)['audio'];
+				} else if (delta.startsWith('{"text":')) {
 					output.push(JSON.parse(delta)['text']);
 				} else if (delta.startsWith('{')) {
 					output.push(JSON.stringify(JSON.parse(delta), null, 2));
@@ -75,6 +78,9 @@
 {/if}
 {#if error}
 	<div class="m-4 whitespace-pre-wrap border-2 border-red-700 p-4">{error}</div>
+{/if}
+{#if audioB64}
+	<audio src="data:audio/mpeg;base64,{audioB64}" controls></audio>
 {/if}
 {#if output.length > 0}
 	<div class="m-4 border-2 border-blue-700 p-4">

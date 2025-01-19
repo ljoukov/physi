@@ -4,6 +4,7 @@ import { newTimer } from "./timer";
 import { getGoogleAccessToken } from "./gcpToken";
 import { deleteTempFile, getTempFilePath, readUint8ArrayFromTempFile, writeUint8ArrayToTempFile } from "./file";
 import { SlidingWindowRateLimiter } from "./rateLimitter";
+import { errorAsString } from "$lib/util/error";
 
 export type TranscriptSegment = {
     text: string;
@@ -43,15 +44,25 @@ export async function tts(
         // TTS and transcribe each segment
         for (const [segmentIndex, segment] of ttsRequest.segments.entries()) {
             const segmentPromise = (async () => {
-                const encodedAudio = await ttsSegment({
-                    voice: 'female',
-                    text: segment.text
-                });
-                const speechFileName = `handleTTS-${timestampStr}-speech-${segmentIndex.toString().padStart(5, '0')}-of-${numSegments.toString().padStart(5, '0')}.mp3`;
-                await writeUint8ArrayToTempFile(encodedAudio, speechFileName);
-                filesToDelete.push(speechFileName);
-                const audioDetails = await getAudioDetails(getTempFilePath(speechFileName));
-                return { speechFileName, audioDetails };
+                for (let i = 0; ; i++) {
+                    try {
+                        const encodedAudio = await ttsSegment({
+                            voice: 'female',
+                            text: segment.text
+                        });
+                        const speechFileName = `handleTTS-${timestampStr}-speech-${segmentIndex.toString().padStart(5, '0')}-of-${numSegments.toString().padStart(5, '0')}.mp3`;
+                        await writeUint8ArrayToTempFile(encodedAudio, speechFileName);
+                        filesToDelete.push(speechFileName);
+                        const audioDetails = await getAudioDetails(getTempFilePath(speechFileName));
+                        return { speechFileName, audioDetails };
+                    } catch (e) {
+                        if (i >= 10) {
+                            console.error(`ttsSegment FAILED: ${errorAsString(e)}`);
+                            throw e;
+                        }
+                        console.info(`ttsSegment[${i}] failed, ignoring: ${errorAsString(e)}`);
+                    }
+                }
             })();
             segmentPromisses.push(segmentPromise);
         }
