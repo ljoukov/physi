@@ -2,7 +2,7 @@
 	import { errorAsString, responseErrorAsString } from '$lib/util/error';
 	import { parseEventSourceStream } from '$lib/util/eventsource-parser';
 
-	let userInput = '';
+	let userInput = 'arm hurts after tennis';
 	let generating = false;
 	let output: string[] = [];
 	let error: string | undefined;
@@ -23,7 +23,13 @@
 				throw Error(`Server failure: ${await responseErrorAsString(resp)}`);
 			}
 			for await (const delta of parseEventSourceStream(resp.body)) {
-				output.push(delta);
+				if (delta.startsWith('{"text":')) {
+					output.push(JSON.parse(delta)['text']);
+				} else if (delta.startsWith('{')) {
+					output.push(JSON.stringify(JSON.parse(delta), null, 2));
+				} else {
+					output.push(delta);
+				}
 				output = output;
 			}
 		} catch (e) {
