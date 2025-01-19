@@ -1,4 +1,4 @@
-import { getGoogleAccessToken } from '$lib/util/gcpToken';
+import { getGoogleAccessToken } from '$lib/server/util/gcpToken';
 import { z } from 'zod';
 import type { RequestHandler } from './$types';
 

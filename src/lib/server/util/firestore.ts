@@ -14,9 +14,9 @@ import { isJsonObject, type JsonValue } from '$lib/util/types';
 import { NullValue } from '$proto/google/protobuf/struct';
 
 import { getGoogleAccessToken, googleProjectId } from './gcpToken';
-import { protoEnum } from './proto';
-import { responseErrorAsString } from './error';
-import { jsonSchema } from './json';
+import { protoEnum } from '../../util/proto';
+import { responseErrorAsString } from '../../util/error';
+import { jsonSchema } from '../../util/json';
 
 const statusCodeProto = protoEnum(StatusCode);
 

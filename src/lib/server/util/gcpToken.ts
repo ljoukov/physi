@@ -1,5 +1,5 @@
 import { GOOGLE_SERVICE_ACCOUNT_JSON } from '$env/static/private';
-import { base64decode, base64encode } from './base64';
+import { base64decode, base64encode } from '$lib/util/base64';
 import { responseErrorAsString } from '$lib/util/error';
 import type { JsonValue } from '$lib/util/types';
 import { z } from 'zod';

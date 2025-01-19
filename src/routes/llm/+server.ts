@@ -1,4 +1,4 @@
-import { llmCompletion } from '$lib/util/llm';
+import { llmCompletion } from '$lib/server/util/llm';
 import type { RequestHandler } from './$types';
 import { text } from '@sveltejs/kit';
 

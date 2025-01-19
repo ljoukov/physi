@@ -66,3 +66,7 @@ export function newTimer() {
 export function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
+
+export async function sleepSec(seconds: number): Promise<void> {
+  await sleep(seconds * 1_000);
+}
