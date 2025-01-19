@@ -14,7 +14,11 @@
 			error = undefined;
 			const abortController = new AbortController();
 			onCancel = () => abortController.abort();
-			const resp = await fetch('./therapy', { method: 'POST', signal: abortController.signal });
+			const resp = await fetch('./therapy', {
+				method: 'POST',
+				signal: abortController.signal,
+				body: JSON.stringify({ userInput })
+			});
 			if (!resp.ok || !resp.body) {
 				throw Error(`Server failure: ${await responseErrorAsString(resp)}`);
 			}
