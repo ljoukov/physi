@@ -119,3 +119,46 @@ export async function* mergeGenerators<T>(generators: AsyncGenerator<T>[]): Asyn
     }
   }
 }
+
+export function callbackToResponse(
+  nextDelta: () => Promise<string | null>,
+  { dataPrefix }: { dataPrefix: string } = { dataPrefix: 'data: ' }
+): Response {
+  const textEncoder = new TextEncoder();
+  const responseHeaders = {
+    headers: { 'Content-Type': 'text/event-stream' }
+  };
+
+  const { readable, writable } = new TransformStream();
+  new ReadableStream({
+    start(controller) {
+      controller.enqueue(new Uint8Array(0));
+      controller.close();
+    }
+  })
+    .pipeThrough(
+      new TransformStream({
+        async start(controller) {
+          try {
+            for (; ;) {
+              const delta = await nextDelta();
+              if (delta === null) {
+                break;
+              }
+              controller.enqueue(textEncoder.encode(`${dataPrefix}${delta}\n\n`));
+            }
+            controller.enqueue(textEncoder.encode(`data: [DONE]\n\n`));
+            controller.terminate();
+          } catch (e) {
+            console.warn(`generatorToResponse error: ${errorAsString(e)}`);
+            controller.enqueue(textEncoder.encode(`error: server error\n\n`));
+          }
+        }
+      })
+    )
+    .pipeTo(writable)
+    .catch(() => {
+      console.error('Exception in generatorToResponse.catch, aborting response generation.');
+    });
+  return new Response(readable, responseHeaders);
+}
