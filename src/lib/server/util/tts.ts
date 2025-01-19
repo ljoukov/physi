@@ -213,6 +213,11 @@ export async function ttsSegment({ text, voice }: { text: string; voice: TTSVoic
             body: JSON.stringify(req)
         }
     );
-    const resp = googleTtsResponseSchema.parse(await fetchResp.json());
-    return new Uint8Array(Buffer.from(resp.audioContent, 'base64'));
+    const json = await fetchResp.json();
+    try {
+        const resp = googleTtsResponseSchema.parse(json);
+        return new Uint8Array(Buffer.from(resp.audioContent, 'base64'));
+    } catch (e) {
+        throw Error(`Failed to parse google TTS response: ${JSON.stringify(json, null, 2)}: ${errorAsString(e)}`);
+    }
 }
