@@ -1,19 +1,6 @@
-import { callbackToResponse, generatorToResponse } from '$lib/server/util/generators';
-import { sleepSec } from '$lib/server/util/timer';
-import { z } from 'zod';
+import { callbackToResponse } from '$lib/server/util/generators';
 import type { RequestHandler } from './$types';
-
-const therapyInputSchema = z.object({ userInput: z.string() });
-type TherapyInput = z.infer<typeof therapyInputSchema>;
-
-async function process({ userInput }: TherapyInput, log: (msg: string) => void) {
-    log(`userInput: ${userInput}`);
-    for (let i = 0; i < 10; i++) {
-        await sleepSec(1);
-        log(`i=${i}`);
-    }
-}
-
+import { generateTherapy, therapyInputSchema } from '$lib/server/therapy/therapy';
 
 export const POST: RequestHandler = async ({ request }) => {
     const therapyInput = therapyInputSchema.parse(await request.json());
@@ -23,7 +10,7 @@ export const POST: RequestHandler = async ({ request }) => {
         messages.push(msg);
         notify();
     };
-    const p = process(therapyInput, log);
+    const p = generateTherapy(therapyInput, log);
     p.then(() => { messages.push(null) });
     const cb = async (): Promise<string | null> => {
         while (messages.length === 0) {
