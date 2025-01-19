@@ -1,65 +1,24 @@
-import { getGoogleAccessToken } from '$lib/server/util/gcpToken';
-import { z } from 'zod';
+import { tts } from '$lib/server/util/tts';
 import type { RequestHandler } from './$types';
 
-async function getAuthToken(): Promise<string> {
-    const accessToken = await getGoogleAccessToken({
-        scopes: [
-            'https://www.googleapis.com/auth/cloud-platform'
-        ],
-        audiences: ['https://accounts.google.com/o/oauth2/token']
-    });
-    return accessToken.token;
-}
-
-const googleTtsResponseSchema = z.object({
-    audioContent: z.string(),
-    audioConfig: z.object({
-        audioEncoding: z.enum(['MP3']),
-        sampleRateHertz: z.number(),
-    })
-});
-
-export type TTSVoice = 'male' | 'female';
-
-async function tts({ text, voice }: { text: string; voice: TTSVoice }) {
-    const name: 'en-US-Journey-F' | 'en-US-Journey-D' = (() => {
-        switch (voice) {
-            case 'male':
-                return 'en-US-Journey-D';
-            case 'female':
-                return 'en-US-Journey-F';
-        }
-    })();
-    const req = {
-        input: {
-            text
+async function runTTS() {
+    const ttsResp = await tts({
+        segments: [{
+            text: 'one',
+            minDurationSec: 2
         },
-        voice: {
-            languageCode: "en-US",
-            name
-        },
-        audioConfig: {
-            audioEncoding: "MP3"
-        }
-    };
-    const fetchResp = await fetch(
-        'https://texttospeech.googleapis.com/v1beta1/text:synthesize',
         {
-            headers: {
-                'Authorization': `Bearer ${await getAuthToken()}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            method: 'POST',
-            body: JSON.stringify(req)
-        }
-    );
-    const resp = googleTtsResponseSchema.parse(await fetchResp.json());
-    return Buffer.from(resp.audioContent, 'base64');
+            text: 'two',
+            minDurationSec: 2
+        },
+        {
+            text: 'three',
+            minDurationSec: 2
+        }]
+    });
+    return ttsResp.audio;
 }
 
 export const GET = (async () => {
-    return new Response(await tts({ text: 'here is your routine', voice: 'male' }), { 'headers': { 'Content-Type': 'audio/mpeg' } });
+    return new Response(await runTTS(), { 'headers': { 'Content-Type': 'audio/mpeg' } });
 }) satisfies RequestHandler;
-
