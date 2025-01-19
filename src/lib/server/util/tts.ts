@@ -173,14 +173,21 @@ const googleTtsResponseSchema = z.object({
 
 export type TTSVoice = 'male' | 'female';
 
-const ttsRateLimiter = new SlidingWindowRateLimiter({
+const ttsRateLimiter1 = new SlidingWindowRateLimiter({
     maxQPW: 10,
     windowSec: 10,
-    label: 'tts'
+    label: 'tts1'
+});
+
+const ttsRateLimiter2 = new SlidingWindowRateLimiter({
+    maxQPW: 40,
+    windowSec: 60,
+    label: 'tts2'
 });
 
 export async function ttsSegment({ text, voice }: { text: string; voice: TTSVoice }): Promise<Uint8Array> {
-    await ttsRateLimiter.waitForAvailability();
+    await ttsRateLimiter1.waitForAvailability();
+    await ttsRateLimiter2.waitForAvailability();
     const name: 'en-US-Journey-F' | 'en-US-Journey-D' = (() => {
         switch (voice) {
             case 'male':

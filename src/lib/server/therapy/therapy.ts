@@ -205,7 +205,6 @@ Start your output with $TITLE:
     }
     log('----');
     log(JSON.stringify({ text: transcriptStr }));
-    console.log(transcriptStr);
     const transcript = parseTranscript(transcriptStr);
     log(JSON.stringify(transcript));
     return transcript;
@@ -287,14 +286,11 @@ export async function generateTherapy(therapyInput: TherapyInput, log: (msg: str
 
     const plan = await generatePlan(therapyInput, log);
     const transcript = await generateTranscript(plan, log);
-    // Limit the number of segments to avoit too long wait times
-    transcript.segments = transcript.segments.slice(0, 25);
+    //    transcript.segments = transcript.segments.slice(0, 25);
     const { audio, audioDetails } = await tts(transcript);
     log(JSON.stringify({ audioDetails }));
-    await writeUint8ArrayToTempFile(audio, "therapy.mp3");
     const audioBase64 = Buffer.from(audio).toString('base64');
     log(JSON.stringify({ audio: audioBase64 }));
-    console.log(`Wrote: ${getTempFilePath("therapy.mp3")}`);
 }
 
 const transcriptDebug: Transcript = {
