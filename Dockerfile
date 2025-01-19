@@ -1,13 +1,5 @@
 FROM node:20 AS base
 
-RUN apt-get update && \
-    apt-get install -y ffmpeg && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
-# Verify ffmpeg and ffprobe installation
-RUN ffmpeg -version && ffprobe -version
-
 WORKDIR /usr/src/app
 
 COPY . .
@@ -20,6 +12,15 @@ RUN npm run build
 
 # ---- Production ----
 FROM node:20-slim AS production
+
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Verify ffmpeg and ffprobe installation
+RUN ffmpeg -version && ffprobe -version
+
 WORKDIR /usr/src/app
 COPY --from=base /usr/src/app/build ./build
 COPY package-prod.json package.json
