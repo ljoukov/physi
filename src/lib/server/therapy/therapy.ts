@@ -1,9 +1,7 @@
 import { z } from "zod";
-import { llmCompletion, llmTextStream, type LLMCompletionRequest } from "../util/llm";
+import { llmTextStream, type LLMCompletionRequest } from "../util/llm";
 import { parseKeyValueDelta, SEPARATOR } from "../util/delta_parser";
-import { tts, ttsSegment, type Transcript } from "../util/tts";
-import { getTempFilePath, writeUint8ArrayToTempFile } from "../util/file";
-import { base64encode } from "$lib/util/base64";
+import { tts, type Transcript } from "../util/tts";
 
 export const therapyInputSchema = z.object({ userInput: z.string() });
 export type TherapyInput = z.infer<typeof therapyInputSchema>;
