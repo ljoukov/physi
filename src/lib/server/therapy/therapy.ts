@@ -281,99 +281,10 @@ export function parseTranscript(llmOutput: string): Transcript {
 
 export async function generateTherapy(therapyInput: TherapyInput, log: (msg: string) => void) {
     log(`Generating therapy for userInput: ${therapyInput.userInput}`);
-
     const plan = await generatePlan(therapyInput, log);
     const transcript = await generateTranscript(plan, log);
-    //    transcript.segments = transcript.segments.slice(0, 25);
     const { audio, audioDetails } = await tts(transcript);
     log(JSON.stringify({ audioDetails }));
     const audioBase64 = Buffer.from(audio).toString('base64');
     log(JSON.stringify({ audio: audioBase64 }));
 }
-
-const transcriptDebug: Transcript = {
-    "segments": [
-        {
-            "text": "Welcome to this short session focused on relieving tennis arm."
-        },
-        {
-            "text": "We'll start with a gentle warm-up."
-        },
-        {
-            "text": "Let's begin with some gentle arm swings."
-        },
-        {
-            "text": "We are going to swing arms forward and backward gently."
-        },
-        {
-            "text": "Keep your movements slow and controlled."
-        },
-        {
-            "text": "Now, gently swing your arms forward..."
-        },
-        {
-            "text": "...one...",
-            "minDurationSec": 1,
-            "leadingPauseSec": 1
-        },
-        {
-            "text": "...two...",
-            "minDurationSec": 1
-        },
-        {
-            "text": "...three...",
-            "minDurationSec": 1
-        },
-        {
-            "text": "...and backward."
-        },
-        {
-            "text": "...one...",
-            "minDurationSec": 1,
-            "leadingPauseSec": 1
-        },
-        {
-            "text": "...two...",
-            "minDurationSec": 1
-        },
-        {
-            "text": "...three...",
-            "minDurationSec": 1
-        },
-        {
-            "text": "Forward again..."
-        },
-        {
-            "text": "...one...",
-            "minDurationSec": 1,
-            "leadingPauseSec": 1
-        },
-        {
-            "text": "...two...",
-            "minDurationSec": 1
-        },
-        {
-            "text": "...three...",
-            "minDurationSec": 1
-        },
-        {
-            "text": "...and backward."
-        },
-        {
-            "text": "...one...",
-            "minDurationSec": 1,
-            "leadingPauseSec": 1
-        },
-        {
-            "text": "...two...",
-            "minDurationSec": 1
-        },
-        {
-            "text": "...three...",
-            "minDurationSec": 1
-        },
-        {
-            "text": "One last time, forward..."
-        },
-    ]
-};
